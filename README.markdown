@@ -32,7 +32,7 @@ Prior inserting data and querying your models, you must declare these models. Th
       }
     });
 
-If your application uses a lot of models, I advice to bond all of these in a `models` variable, which will contain every models:
+If your application uses a lot of models, I advice to bind all of these in a `models` variable, which will contain every models:
 
     var models = (function() {
       m.human = new joli.model({
@@ -139,9 +139,9 @@ The first method i however adviced, as it performs some checks on the existence 
 Retrieving data is often a pain. For all the models, joli.js implements some magic finders in the model classes:
 
 * `findBy(field, value)` allows to retrieve a list of the records having a specific value for one of its fields
-* `findById(field, value)` allows to retrieve a list of the records having a specific id
+* `findById(id)` allows to retrieve a list of the records having a specific id
 * `findOneBy(field, value)` allows to retrieve one record having a specific value for one of its fields. If several records match the criteria, then onl the first one will be returned
-* `findOneById(field, value)` allows to retrieve one record having a specific id
+* `findOneById(id)` allows to retrieve one record having a specific id
 
 But of course, you will want to perform more complex searches. This is where the query API enters in the dance. This query API allows to create `joli.query` objects, which are turned into real SQL queries by the ORM when executing the query.
 
@@ -169,7 +169,7 @@ This is particularly powerful when you want to add restrictions to the query in 
 
 The Query API supports lots of things. Just have a check at the joli.query class!
 
-In some cases however, you will find this way of querying your models just to long, and you'll prefer an other alternative syntax (Criteria-style querying API):
+In some cases however, you will find this way of querying your models just too long, and you will prefer an other alternative syntax (Criteria-style querying API):
 
     var humans = models.human.all({
       where: {
