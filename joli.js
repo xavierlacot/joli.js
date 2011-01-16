@@ -218,7 +218,7 @@ joli.model.prototype = {
       });
     }
 
-    return q.execute();
+    return parseInt(q.execute(), 10);
   },
 
   // no callbacks, more efficient
