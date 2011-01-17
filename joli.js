@@ -273,7 +273,7 @@ joli.model.prototype = {
     var data = {};
 
     joli.each(this.options.columns, function(colType, colName) {
-      data[colName] = values[colName] || null;
+      data[colName] = (values[colName] === undefined) ? null : values[colName];
     });
 
     var record = new joli.record(this).fromArray(data);
