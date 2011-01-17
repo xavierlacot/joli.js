@@ -151,7 +151,7 @@ joli.Connection = function(database) {
 
 joli.Connection.prototype = {
   execute: function(query) {
-    // Titanium.API.log(query);
+    // Titanium.API.log('debug', query);
     return this.database.execute(query);
   },
 
@@ -395,6 +395,10 @@ joli.query.prototype = {
   getCount: function(rows) {
     var result;
 
+    if (null == rows) {
+      return 0;
+    }
+
     if (0 == rows.rowCount) {
       result = 0;
     } else {
@@ -455,7 +459,7 @@ joli.query.prototype = {
       return result;
     }
 
-    //Titanium.API.log('hydrating ' + rows.rowCount + ' rows.');
+    //Titanium.API.log('debug', 'hydrating ' + rows.rowCount + ' rows.');
     var i;
     var rowData;
 
