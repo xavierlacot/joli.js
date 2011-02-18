@@ -151,7 +151,7 @@ joli.Connection = function(database) {
 
 joli.Connection.prototype = {
   execute: function(query) {
-    // Titanium.API.log('debug', query);
+    Titanium.API.log('debug', query);
     return this.database.execute(query);
   },
 
@@ -428,7 +428,7 @@ joli.query.prototype = {
 
         return 'select ' + this.data.select_columns + ' from ' + this.data.from + join;
       case 'update':
-        return 'update ' + this.data.from + ' set ' + this.data.values.join(', ');
+        return 'update ' + this.data.from + ' set ' + this.data.set.join(', ');
       default:
         throw("Operation type Error. joli.query operation type must be an insert, a delete, a select or an update.");
     }
