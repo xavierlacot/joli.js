@@ -151,7 +151,7 @@ joli.Connection = function(database) {
 
 joli.Connection.prototype = {
   execute: function(query) {
-    Titanium.API.log('info', query);
+//    Titanium.API.log('debug', query);
     return this.database.execute(query);
   },
 
