@@ -151,7 +151,7 @@ joli.Connection = function(database) {
 
 joli.Connection.prototype = {
   execute: function(query) {
-    // Titanium.API.log('debug', query);
+    Titanium.API.log('info', query);
     return this.database.execute(query);
   },
 
@@ -160,6 +160,38 @@ joli.Connection.prototype = {
   }
 };
 
+
+/**
+ * Migration description
+ */
+joli.migration = function(options) {
+  var defaults = {
+    tableName: 'migration'
+  };
+
+  joli.setOptions.call(this, options, defaults);
+  this.table = this.options.tableName;
+};
+
+joli.migration.prototype = {
+  getVersion: function() {
+    var q = new joli.query().select().from(this.table).order('version desc');
+    var version = q.execute();
+
+    if (version.length > 0) {
+      return version[0].version;
+    } else {
+      var q = new joli.query().insertInto(this.table).values({ version: 0 });
+      q.execute();
+      return 0;
+    }
+  },
+
+  setVersion: function(version) {
+    var q = new joli.query().update(this.table).set({ version:  version });
+    q.execute();
+  }
+};
 
 /**
  * Model description
@@ -200,6 +232,10 @@ joli.model.prototype = {
 
     if (constraints.order) {
       q.order(constraints.order);
+    }
+
+    if (constraints.limit) {
+      q.limit(constraints.limit);
     }
 
     return q.execute();
@@ -306,6 +342,7 @@ joli.model.prototype = {
 
 joli.Models = function() {
   this.models = {};
+  this.migration = new joli.migration({ tableName: 'migration' });
 };
 
 joli.Models.prototype = {
@@ -331,6 +368,22 @@ joli.Models.prototype = {
       var query = 'CREATE TABLE IF NOT EXISTS ' + modelName + ' (' + columns.join(', ') + ')';
       joli.connection.execute(query);
     });
+  },
+
+  migrate: function(version) {
+    // create migration table
+    var query = 'CREATE TABLE IF NOT EXISTS ' + this.migration.table + ' (version)';
+    joli.connection.execute(query);
+
+    if (this.migration.getVersion() < version) {
+      joli.each(this.models, function(model, modelName) {
+        var query = 'DROP TABLE IF EXISTS ' + modelName;
+        joli.connection.execute(query);
+      });
+
+      // insert migration
+      this.migration.setVersion(version);
+    }
   },
 
   set: function(table, model) {
@@ -428,7 +481,7 @@ joli.query.prototype = {
 
         return 'select ' + this.data.select_columns + ' from ' + this.data.from + join;
       case 'update':
-        return 'update ' + this.data.from + ' set ' + this.data.values.join(', ');
+        return 'update ' + this.data.from + ' set ' + this.data.set.join(', ');
       default:
         throw("Operation type Error. joli.query operation type must be an insert, a delete, a select or an update.");
     }
