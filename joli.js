@@ -181,7 +181,7 @@ joli.migration.prototype = {
     if (version.length > 0) {
       return version[0].version;
     } else {
-      var q = new joli.query().insertInto(this.table).values({ version: 0 });
+      q = new joli.query().insertInto(this.table).values({ version: 0 });
       q.execute();
       return 0;
     }
@@ -515,11 +515,12 @@ joli.query.prototype = {
     //Titanium.API.log('debug', 'hydrating ' + rows.rowCount + ' rows.');
     var i;
     var rowData;
+    var fieldCount;
 
     if (Titanium.Platform.name != 'android') {
-      var fieldCount = rows.fieldCount();
+      fieldCount = rows.fieldCount();
     } else {
-      var fieldCount = rows.fieldCount;
+      fieldCount = rows.fieldCount;
     }
 
     while (rows.isValidRow()) {
@@ -576,7 +577,12 @@ joli.query.prototype = {
 
   set: function(values) {
     joli.each(values, function(expression, value) {
-      this.data.set.push(value + ' = ' + joli.typeValue(expression));
+      if (-1 === value.indexOf('=')) {
+        this.data.set.push(value + ' = ' + joli.typeValue(expression));
+      } else {
+        // some particular expression containing "="
+        this.data.set.push(value);
+      }
     }, this);
     return this;
   },
