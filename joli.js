@@ -79,7 +79,7 @@ var joli = {
       this.options = {};
     }
 
-    mergedOptions = joli.merge(defaults, options);
+    var mergedOptions = joli.merge(defaults, options);
 
     for (var opt in defaults) {
       this.options[opt] = mergedOptions[opt];
@@ -181,7 +181,7 @@ joli.migration.prototype = {
     if (version.length > 0) {
       return version[0].version;
     } else {
-      var q = new joli.query().insertInto(this.table).values({ version: 0 });
+      q = new joli.query().insertInto(this.table).values({ version: 0 });
       q.execute();
       return 0;
     }
@@ -286,7 +286,7 @@ joli.model.prototype = {
   findOneBy: function(field, value) {
     var result = new joli.query().select().from(this.table).where(field + ' = ?', value).limit(1).execute();
 
-    if (result.length == 0) {
+    if (result.length === 0) {
       return false;
     } else {
       return result[0];
@@ -322,7 +322,7 @@ joli.model.prototype = {
   },
 
   save: function(data) {
-    if (data.data.length == 0) {
+    if (data.data.length === 0) {
       return;
     }
 
@@ -448,11 +448,11 @@ joli.query.prototype = {
   getCount: function(rows) {
     var result;
 
-    if (null == rows) {
+    if (null === rows) {
       return 0;
     }
 
-    if (0 == rows.rowCount) {
+    if (0 === rows.rowCount) {
       result = 0;
     } else {
       result = rows.fieldByName('total');
@@ -515,11 +515,12 @@ joli.query.prototype = {
     //Titanium.API.log('debug', 'hydrating ' + rows.rowCount + ' rows.');
     var i;
     var rowData;
+    var fieldCount;
 
     if (Titanium.Platform.name != 'android') {
-      var fieldCount = rows.fieldCount();
+      fieldCount = rows.fieldCount();
     } else {
-      var fieldCount = rows.fieldCount;
+      fieldCount = rows.fieldCount;
     }
 
     while (rows.isValidRow()) {
@@ -531,8 +532,8 @@ joli.query.prototype = {
         i++;
       }
 
-    	result.push(rowData);
-    	rows.next();
+      result.push(rowData);
+      rows.next();
     }
 
     rows.close();
@@ -596,7 +597,7 @@ joli.query.prototype = {
   },
 
   where: function(expression, value) {
-    if (null != this.data.where) {
+    if (null !== this.data.where) {
       this.data.where += ' and ';
     } else {
       this.data.where = '';
@@ -607,7 +608,7 @@ joli.query.prototype = {
   },
 
   whereIn: function(expression, value) {
-    if (null != this.data.where) {
+    if (null !== this.data.where) {
       this.data.where += ' and ';
     } else {
       this.data.where = '';
