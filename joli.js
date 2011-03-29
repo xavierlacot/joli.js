@@ -577,7 +577,12 @@ joli.query.prototype = {
 
   set: function(values) {
     joli.each(values, function(expression, value) {
-      this.data.set.push(value + ' = ' + joli.typeValue(expression));
+      if (-1 === value.indexOf('=')) {
+        this.data.set.push(value + ' = ' + joli.typeValue(expression));
+      } else {
+        // some particular expression containing "="
+        this.data.set.push(value);
+      }
     }, this);
     return this;
   },
