@@ -494,6 +494,10 @@ joli.query.prototype = {
       query += ' where ' + this.data.where;
     }
 
+    if (this.data.groupBy) {
+      query += ' group by ' + this.data.groupBy.join(', ');
+    }
+
     if (this.data.order.length > 0) {
       query += ' order by ' + this.data.order.join(', ');
     }
@@ -503,6 +507,15 @@ joli.query.prototype = {
     }
 
     return query;
+  },
+
+  groupBy: function(group) {
+    if ('string' == joli.getType(group)) {
+      group = [group];
+    }
+
+    this.data.groupBy = group;
+    return this;
   },
 
   hydrate: function(rows) {
