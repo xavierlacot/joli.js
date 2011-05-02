@@ -103,6 +103,18 @@ At the first launch of an application on a device, it is required to create the 
     joli.models.initialize();
 
 
+Would you like the "id" to get autoincremented, just add the informations "PRIMARY KEY AUTOINCREMENT" to the column definition :
+
+    var city = new joli.model({
+      table:    'city',
+      columns:  {
+        id:                 'INTEGER PRIMARY KEY AUTOINCREMENT',
+        name:               'TEXT',
+        description:        'TEXT'
+      }
+    });
+
+
 ### Data insertion
 Inserting data can be done using the `newRecord()` method of a model:
 
