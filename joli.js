@@ -700,7 +700,18 @@ joli.query.prototype = {
       this.data.where = '';
     }
 
-    this.data.where += expression.replace(/\?/gi, '"' + value + '"');
+	// handle replacing multiple values, as is needed in a BETWEEN query or similar
+	if(typeof(value) == "object") {
+		var i = 0;
+		while(expression.indexOf("?") != -1) { // replace question marks one at a time from the array
+			expression = expression.replace(/\?/i, value[i]);
+			i++;
+		}
+		this.data.where += expression;
+	} else {
+    	this.data.where += expression.replace(/\?/gi, '"' + value + '"');
+   	}
+   	
     return this;
   },
 
