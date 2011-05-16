@@ -398,7 +398,7 @@ joli.Models.prototype = {
     });
   },
 
-  migrate: function(version) {
+  migrate: function(version, migrationCallback) {
     // create migration table
     var query = 'CREATE TABLE IF NOT EXISTS ' + this.migration.table + ' (version)';
     joli.connection.execute(query);
@@ -408,6 +408,14 @@ joli.Models.prototype = {
         var query = 'DROP TABLE IF EXISTS ' + modelName;
         joli.connection.execute(query);
       });
+      
+      // optional migration callback
+      if(migrationCallback && typeof(migrationCallback) == "function") {
+      	migrationCallback({
+      		table:this.migration.table,
+      		newVersion:version
+      	});
+      }
 
       // insert migration
       this.migration.setVersion(version);
