@@ -199,7 +199,8 @@ joli.migration.prototype = {
 joli.model = function(options) {
   var defaults = {
     table: '',
-    columns: {}
+    columns: {},
+    objectMethods: {}
   };
 
   if (options.methods) {
@@ -317,6 +318,13 @@ joli.model.prototype = {
     record.isNew = function() {
       return true;
     };
+
+    // add object methods
+    if (this.options.objectMethods) {
+      joli.each(this.options.objectMethods, function(method, name) {
+        record[name] = method;
+      });
+    }
 
     return record;
   },
@@ -713,5 +721,10 @@ joli.record.prototype = {
     };
 
     return true;
+  },
+
+  set: function(key, value) {
+    this.key = value;
+    this._data[key] = value;
   }
 };

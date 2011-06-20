@@ -35,23 +35,41 @@ Prior inserting data and querying your models, you must declare these models. Th
 If your application uses a lot of models, I advice to bind all of these in a `models` variable, which will contain every models:
 
     var models = (function() {
+      var m = {};
+
       m.human = new joli.model({
         table:    'human',
         columns:  {
-          id:                 'INTEGER',
+          id:                 'INTEGER PRIMARY KEY AUTOINCREMENT',
           city_id:            'INTEGER',
           first_name:         'TEXT',
           last_name:          'TEXT'
         },
         methods: {
+          countIn:  function(cityName) {
+            // search for the city id
+            var city = joli.models.get('city').findOneBy('name', cityName);
+
+            if (!city) {
+              throw 'Could not find a city with the name ' + cityName + '!';
+            } else {
+              return this.count({
+                where: {
+                  'city_id = ?': city.id
+                }
+              });
+            }
+          }
+        },
+        objectMethods: {
           move:  function(newCityName) {
             // search for the city id
             var city = joli.models.get('city').findOneBy('name', newCityName);
 
             if (!city) {
-              throw 'Could not find a city with this name!';
+              throw 'Could not find a city with the name ' + newCityName + '!';
             } else {
-              this.city_id = city.id;
+              this.set('city_id', city.id);
             }
           }
         }
@@ -60,7 +78,7 @@ If your application uses a lot of models, I advice to bind all of these in a `mo
       m.city = new joli.model({
         table:    'city',
         columns:  {
-          id:                 'INTEGER',
+          id:                 'INTEGER PRIMARY KEY AUTOINCREMENT',
           country_id:         'INTEGER',
           name:               'TEXT',
           description:        'TEXT'
@@ -70,7 +88,7 @@ If your application uses a lot of models, I advice to bind all of these in a `mo
       m.country = new joli.model({
         table:    'country',
         columns:  {
-          id:                 'INTEGER',
+          id:                 'INTEGER PRIMARY KEY AUTOINCREMENT',
           name:               'TEXT'
         }
       });
@@ -83,7 +101,8 @@ The parameters array, which allows to configure a model, may contain several key
 
 * `table`: the table name,
 * `columns`: the name of the various columns proposed by the model. For each of them, it is required to specify their type (`INTEGER`, `TEXT` or `FLOAT`),
-* `methods`: a table of methods, in order to extend the model (see the `move` method upper)
+* `methods`: a table of class-level methods, in order to extend the model (see the `countIn` method upper). Note: these methods will be added to the model definition, not its instances,
+* `objectMethods`: a table of object-level methods, which allow to extend the model instances (see the `move` method upper).
 
 ## Usage
 This section describes the way on how to use joli.js.
@@ -103,7 +122,7 @@ At the first launch of an application on a device, it is required to create the 
     joli.models.initialize();
 
 
-Would you like the "id" to get autoincremented, just add the informations "PRIMARY KEY AUTOINCREMENT" to the column definition :
+Would you like the "id" to get auto-incremented, just add the informations "PRIMARY KEY AUTOINCREMENT" to the column definition :
 
     var city = new joli.model({
       table:    'city',
@@ -144,7 +163,7 @@ You may also want to create a record using the instance class directly:
     // persist it
     john.save();
 
-The first method i however adviced, as it performs some checks on the existence of the columns.
+The first method is however advised, as it performs some checks on the existence of the columns.
 
 
 ### Data retrieval and Query API
@@ -152,7 +171,7 @@ Retrieving data is often a pain. For all the models, joli.js implements some mag
 
 * `findBy(field, value)` allows to retrieve a list of the records having a specific value for one of its fields
 * `findById(id)` allows to retrieve a list of the records having a specific id
-* `findOneBy(field, value)` allows to retrieve one record having a specific value for one of its fields. If several records match the criteria, then onl the first one will be returned
+* `findOneBy(field, value)` allows to retrieve one record having a specific value for one of its fields. If several records match the criteria, then only the first one will be returned
 * `findOneById(id)` allows to retrieve one record having a specific id
 
 But of course, you will want to perform more complex searches. This is where the query API enters in the dance. This query API allows to create `joli.query` objects, which are turned into real SQL queries by the ORM when executing the query.
@@ -179,7 +198,7 @@ This is particularly powerful when you want to add restrictions to the query in 
 
     var humans = q.execute();
 
-The Query API supports lots of things. Just have a check at the joli.query class!
+The Query API supports lots of things. Just have a check at the `joli.query` class!
 
 In some cases however, you will find this way of querying your models just too long, and you will prefer an other alternative syntax (Criteria-style querying API):
 
@@ -218,6 +237,10 @@ licensed under the MIT license.
 Please use GitHub in order to report bugs, but you may also ask for help on how to use joli.js by sending me a mail directly. My email address is xavier@lacot.org.
 
 ## Changelog
+
+### Version 0.2 - 2011-06-20
+
+* added object-level methods, and fixed the documentation accordingly
 
 ### Version 0.1 - 2010-11-15
 Initial public release. Features a simple ActiveRecord implementation, along with an OOP query API.
