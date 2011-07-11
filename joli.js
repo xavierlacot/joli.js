@@ -1,13 +1,15 @@
 var joli = {
   each: function(collection, iterator, bind) {
+    var i, l, property;
+
     switch (joli.getType(collection)) {
       case "array":
-        for (var i = 0, l = collection.length; i < l; i++) {
+        for (i = 0, l = collection.length; i < l; i++) {
           iterator.call(bind, collection[i], i);
         }
         break;
       case "object":
-        for (var property in collection) {
+        for (property in collection) {
           if (collection.hasOwnProperty(property)) {
             iterator.call(bind, collection[property], property);
           }
@@ -17,19 +19,25 @@ var joli = {
   },
 
   extend: function(baseClass, options) {
+    var opt, prop;
+
     if (!this.options) {
       this.options = {};
     }
 
     this.parent = new baseClass(options);
 
-    for (var prop in this.parent) {
-      this[prop] = this[prop] || this.parent[prop];
+    for (prop in this.parent) {
+      if (this.parent.hasOwnProperty(prop)) {
+        this[prop] = this[prop] || this.parent[prop];
+      }
     }
 
     // copy base options over
-    for (var opt in this.parent.options) {
-      this.options[opt] = this.options[opt] || this.parent.options[opt];
+    for (opt in this.parent.options) {
+      if (this.parent.options.hasOwnProperty(opt)) {
+        this.options[opt] = this.options[opt] || this.parent.options[opt];
+      }
     }
   },
 
@@ -44,26 +52,30 @@ var joli = {
   },
 
   jsonParse: function(json) {
-    return eval('(' + json + ')');
+    return JSON.parse(json);
   },
 
   merge: function() {
+    var i, l, prop;
+
     var mergedObject = {};
 
-    for (var i = 0, l = arguments.length; i < l; i++) {
+    for (i = 0, l = arguments.length; i < l; i++) {
       var object = arguments[i];
 
       if (joli.getType(object) !== "object") {
         continue;
       }
 
-      for (var prop in object) {
-        var objectProp = object[prop], mergedProp = mergedObject[prop];
+      for (prop in object) {
+        if (object.hasOwnProperty(prop)) {
+          var objectProp = object[prop], mergedProp = mergedObject[prop];
 
-        if (mergedProp && joli.getType(objectProp) === "object" && joli.getType(mergedProp) === "object") {
-          mergedObject[prop] = joli.merge(mergedProp, objectProp);
-        } else {
-          mergedObject[prop] = objectProp;
+          if (mergedProp && joli.getType(objectProp) === "object" && joli.getType(mergedProp) === "object") {
+            mergedObject[prop] = joli.merge(mergedProp, objectProp);
+          } else {
+            mergedObject[prop] = objectProp;
+          }
         }
       }
     }
@@ -71,6 +83,8 @@ var joli = {
   },
 
   setOptions: function(options, defaults) {
+    var opt;
+
     if (!options) {
       options = {};
     }
@@ -81,8 +95,10 @@ var joli = {
 
     var mergedOptions = joli.merge(defaults, options);
 
-    for (var opt in defaults) {
-      this.options[opt] = mergedOptions[opt];
+    for (opt in defaults) {
+      if (defaults.hasOwnProperty(opt)) {
+        this.options[opt] = mergedOptions[opt];
+      }
     }
   },
 
@@ -128,9 +144,9 @@ var joli = {
         val = "'" + val + "'";
       } else if (joli.getType(val) === "boolean") {
         if (val) {
-          return 1;
+          return "1";
         } else {
-          return 0;
+          return "0";
         }
       }
     }
@@ -426,11 +442,11 @@ joli.query.prototype = {
     return this;
   },
 
-  execute: function() {
-    return this.executeQuery(this.getQuery());
+  execute: function(hydratationMode) {
+    return this.executeQuery(this.getQuery(), hydratationMode);
   },
 
-  executeQuery: function(query) {
+  executeQuery: function(query, hydratationMode) {
     var rows;
 
     switch (this.data.operation) {
@@ -441,8 +457,12 @@ joli.query.prototype = {
         joli.connection.execute(query);
         return joli.connection.lastInsertRowId();
       case 'select':
+        if (typeof hydratationMode === 'undefined') {
+          hydratationMode = 'object';
+        }
+
         rows = joli.connection.execute(query);
-        return this.hydrate(rows);
+        return this.hydrate(rows, hydratationMode);
       default:
         return joli.connection.execute(query);
     }
@@ -526,16 +546,17 @@ joli.query.prototype = {
     return this;
   },
 
-  hydrate: function(rows) {
+  hydrate: function(rows, hydratationMode) {
     var result = [];
+
+    if (null === hydratationMode) {
+      hydratationMode = 'object';
+    }
 
     if (!rows) {
       return result;
     }
 
-    //Titanium.API.log('debug', 'hydrating ' + rows.rowCount + ' rows.');
-    var i;
-    var rowData;
     var fieldCount;
 
     if (Titanium.Platform.name != 'android') {
@@ -543,6 +564,26 @@ joli.query.prototype = {
     } else {
       fieldCount = rows.fieldCount;
     }
+
+    switch (hydratationMode) {
+      case 'array':
+        result = this.hydrateArray(rows, fieldCount);
+        break;
+      case 'object':
+        result = this.hydrateObject(rows, fieldCount);
+        break;
+      default:
+        throw('Unknown hydratation mode "' + hydratationMode + '". hydratationMode must be "object" or "array"');
+    }
+
+    rows.close();
+    return result;
+  },
+
+  hydrateArray: function(rows, fieldCount) {
+    var result = [];
+    var i;
+    var rowData;
 
     while (rows.isValidRow()) {
       i = 0;
@@ -557,7 +598,29 @@ joli.query.prototype = {
       rows.next();
     }
 
-    rows.close();
+    return result;
+  },
+
+  hydrateObject: function(rows, fieldCount) {
+    var result = [];
+    var i;
+    var record;
+    var rowData;
+    var model = joli.models.get(this.data.from);
+
+    while (rows.isValidRow()) {
+      i = 0;
+      rowData = {};
+
+      while (i < fieldCount) {
+        rowData[rows.fieldName(i)] = rows.field(i);
+        i++;
+      }
+
+      result.push(model.newRecord().fromArray(rowData));
+      rows.next();
+    }
+
     return result;
   },
 
