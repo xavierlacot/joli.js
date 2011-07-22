@@ -3,6 +3,8 @@
 ## Presentation of joli.js
 joli.js is a simple ORM for [Appcelerator Titanium mobile](http://www.appcelerator.com/products/titanium-mobile-application-development/) projects. It was built borrowing large parts of the code of [JazzRecord](http://www.jazzrecord.org/), a more general and complex javascript ORM. Praise and kudos to them!
 
+joli.js is widely unit-tested. Go check [the demo application](https://github.com/xavierlacot/joli.js-demo/) in order to run the test suite.
+
 ## What does "joli" stand for?
 "joli" means in French "nice", "tiny". Just what joli.js tries to be.
 
@@ -237,6 +239,17 @@ licensed under the MIT license.
 Please use GitHub in order to report bugs, but you may also ask for help on how to use joli.js by sending me a mail directly. My email address is xavier@lacot.org.
 
 ## Changelog
+
+### Version 0.3 - 2011-07-22
+* added a lot of unit tests [in the demonstration application](https://github.com/xavierlacot/joli.js-demo/). Most ORM features are now unit-tested.
+* selection now return object collections
+* added support for several hydratation modes
+* joli.js now validates through [jshint](http://jshint.com/)
+* introduced joli.model.truncate(), which empties the table associated to a model
+* introduced joli.record.get(), which allows to acces one record's properties
+* made joli.query.join() able to complete the joined field names in the format table.field
+* fixed joli.query.whereIn() which was buggy for textual values
+* fixed a variable-reference bug in joli.record.save(), which led to an inconsistent behavior of joli.record.isChanged()
 
 ### Version 0.2 - 2011-06-20
 
