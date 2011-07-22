@@ -361,6 +361,10 @@ joli.model.prototype = {
     }
 
     return q.execute();
+  },
+
+  truncate: function() {
+    new joli.query().destroy().from(this.table).execute();
   }
 };
 
@@ -503,7 +507,11 @@ joli.query.prototype = {
 
         if (this.data.join.length > 0) {
           joli.each(this.data.join, function(value, key) {
-            join = join + ' left outer join ' + value[0] + ' ON ' + value[1] + '=' + value[2];
+            if (-1 === value[1].indexOf('.')) {
+              value[1] = value[0] + '.' + value[1];
+            }
+
+            join = join + ' left outer join ' + value[0] + ' on ' + value[1] + ' = ' + value[2];
           });
         }
 
@@ -703,7 +711,15 @@ joli.query.prototype = {
       this.data.where = '';
     }
 
-    this.data.where += expression + ' IN ' + value;
+    if ('array' == joli.getType(value)) {
+      if (0 === value.length) {
+        return this;
+      }
+
+      value = '(\'' + value.join('\', \'') + '\')'
+    }
+
+    this.data.where += expression + ' in ' + value;
     return this;
   }
 };
@@ -752,6 +768,10 @@ joli.record.prototype = {
     return this;
   },
 
+  get: function(key) {
+    return this[key];
+  },
+
   isChanged: function() {
     if (this.isNew()) {
       return false;
@@ -767,17 +787,20 @@ joli.record.prototype = {
       data.originalData = this._originalData;
       this._options.table.save(data);
     } else if(this.isNew()) {
-      this._data.id = this._options.table.save(data);
+      this._data['id'] = this._options.table.save(data);
     }
 
     // overwrite original data so it is no longer "dirty" OR so it is no longer new
     this._originalData = {};
+    var newData = {};
 
     joli.each(this._options.columns, function(colType, colName) {
       this._originalData[colName] = this._data[colName];
+      newData[colName] = this._data[colName];
+      this[colName] = this._data[colName];
     }, this);
 
-    this._data = this._originalData;
+    this._data = newData;
 
     this.isNew = function() {
       return false;
@@ -787,7 +810,7 @@ joli.record.prototype = {
   },
 
   set: function(key, value) {
-    this.key = value;
+    this[key] = value;
     this._data[key] = value;
   }
 };
