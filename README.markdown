@@ -200,7 +200,20 @@ This is particularly powerful when you want to add restrictions to the query in 
 
     var humans = q.execute();
 
-The Query API supports lots of things. Just have a check at the `joli.query` class!
+The Query API supports lots of things. Just have a check at the `joli.query` class, or look at the samples provided in [the joli.query test suite](https://github.com/xavierlacot/joli.js-demo/blob/master/Resources/test/query.js)!
+
+For instance, the following query syntaxes are supported by the API:
+
+    var q = new joli.query()
+      .select()
+      .from('human')
+      .whereIn('last_name', [ 'Doe', 'Smith' ]);
+
+
+    var q = new joli.query()
+      .select()
+      .from('view_count')
+      .where('nb_views between ? and ?', [1000, 2000]);
 
 In some cases however, you will find this way of querying your models just too long, and you will prefer an other alternative syntax (Criteria-style querying API):
 
