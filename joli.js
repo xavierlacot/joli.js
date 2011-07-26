@@ -738,7 +738,7 @@ joli.query.prototype = {
         return this;
       }
 
-      value = '(\'' + value.join('\', \'') + '\')'
+      value = '(\'' + value.join('\', \'') + '\')';
     }
 
     this.data.where += expression + ' in ' + value;
