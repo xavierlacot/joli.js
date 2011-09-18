@@ -28,16 +28,12 @@ var joli = {
     this.parent = new baseClass(options);
 
     for (prop in this.parent) {
-      if (this.parent.hasOwnProperty(prop)) {
-        this[prop] = this[prop] || this.parent[prop];
-      }
+      this[prop] = this[prop] || this.parent[prop];
     }
 
     // copy base options over
     for (opt in this.parent.options) {
-      if (this.parent.options.hasOwnProperty(opt)) {
-        this.options[opt] = this.options[opt] || this.parent.options[opt];
-      }
+      this.options[opt] = this.options[opt] || this.parent.options[opt];
     }
   },
 
@@ -96,9 +92,7 @@ var joli = {
     var mergedOptions = joli.merge(defaults, options);
 
     for (opt in defaults) {
-      if (defaults.hasOwnProperty(opt)) {
-        this.options[opt] = mergedOptions[opt];
-      }
+      this.options[opt] = mergedOptions[opt];
     }
   },
 
@@ -752,6 +746,7 @@ joli.record = function(table) {
     columns: table.getColumns()
   };
   this._data = {};
+  this._metadata = {};
 };
 
 joli.record.prototype = {
@@ -765,7 +760,7 @@ joli.record.prototype = {
 
   fromArray: function(data) {
     if (data.id) {
-      this._originalData = {};
+      this._originalData = { id: data.id };
       this.isNew = function() {
         return false;
       };
@@ -782,7 +777,7 @@ joli.record.prototype = {
       this._data[colName] = null;
       this._data[colName] = data[colName];
 
-      if (this._originalData) {
+      if (this._originalData && this.isNew()) {
         this._originalData[colName] = data[colName];
       }
     }, this);
@@ -803,7 +798,10 @@ joli.record.prototype = {
   },
 
   save: function() {
-    var data = { data: this._data };
+    var data = {
+      data: this._data,
+      metadata: this._metadata
+    };
 
     if (this.isChanged()) {
       data.originalData = this._originalData;
@@ -834,5 +832,15 @@ joli.record.prototype = {
   set: function(key, value) {
     this[key] = value;
     this._data[key] = value;
+  },
+
+  toArray: function(data) {
+    var result = [];
+
+    joli.each(this._options.columns, function(colType, colName) {
+      result[colName] = this._data[colName];
+    }, this);
+
+    return result;
   }
 };
