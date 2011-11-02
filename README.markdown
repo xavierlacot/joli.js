@@ -245,6 +245,13 @@ Would you have a specific part of your code where your models can not be accesse
 
     models.human == joli.models.get('human');
 
+### Are there demo joli.js applications in the wild?
+There are at the moment three open source applications using joli.js:
+
+* [xavccMobileApp](https://github.com/xavierlacot/xavccMobileApp) is an url shortening application which uses joli.js for storing shortened urls in a local cache;
+* [joli.js-demo](https://github.com/xavierlacot/joli.js-demo/) is a demo application, which contains the unit-tests for joli.js;
+* [joli.api.js-demo](https://github.com/xavierlacot/joli.api.js-demo/) is an Iphone Addressbook-like application, which content gets synchronized with web services. This application was built in a couple of hours and was presented a a demo app at [CodeStrong](http://codestrong.com/) in 2011.
+
 ## Credits and support
 joli.js has been developed by [Xavier Lacot](http://lacot.org/) and is
 licensed under the MIT license.
@@ -252,6 +259,14 @@ licensed under the MIT license.
 Please use GitHub in order to report bugs, but you may also ask for help on how to use joli.js by sending me a mail directly. My email address is xavier@lacot.org.
 
 ## Changelog
+
+### master
+* added a .as() method for building queries with join() (thanks nicjansma)
+* fixed a bug in the query where() method, when a value was 0 or '' (thanks nicjansma)
+* added a toArray() method on record instances
+* fixed missing semicolon (jslint inside)
+* adding optional migration callback to make migrations more general in usage (thanks Anthony Roldan)
+* updated the documentation
 
 ### Version 0.3 - 2011-07-22
 * added a lot of unit tests [in the demonstration application](https://github.com/xavierlacot/joli.js-demo/). Most ORM features are now unit-tested.
