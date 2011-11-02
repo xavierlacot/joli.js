@@ -707,7 +707,7 @@ joli.query.prototype = {
       var i = 0;
 
       // replace question marks one at a time from the array
-      while (expression.indexOf('?') != -1 && value[i]) {
+      while (expression.indexOf('?') != -1 && value[i] !== undefined) {
         expression = expression.replace(/\?/i, '"' + value[i] + '"');
         i++;
       }
