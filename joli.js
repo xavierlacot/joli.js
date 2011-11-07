@@ -852,3 +852,11 @@ joli.record.prototype = {
     return result;
   }
 };
+
+if (exports){
+	for (prop in joli) {
+		if (joli.hasOwnProperty(prop)) {
+			exports[prop] = joli[prop];
+		}
+	}
+}
