@@ -836,3 +836,11 @@ joli.record.prototype = {
     this._data[key] = value;
   }
 };
+
+if (exports){
+	for (prop in joli) {
+		if (joli.hasOwnProperty(prop)) {
+			exports[prop] = joli[prop];
+		}
+	}
+}
