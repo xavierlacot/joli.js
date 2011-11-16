@@ -34,6 +34,45 @@ Prior inserting data and querying your models, you must declare these models. Th
       }
     });
 
+This is the example if you have a compose primary key or any foreign key or a compose foreign key   
+
+	var example = new joli.model({
+		table : 'example',
+		columns : {
+			id_category : 'INTEGER',
+			lang : 'TEXT',
+			id_company : 'INTEGER',
+			id_user : 'INTEGER',
+			other_column : 'TEXT'
+		},
+		constraints : {
+			primary_key : 'id_category, lang',
+			foreign_keys : {
+				a : {
+					local : 'id_category',
+					referenced_table : 'category',
+					referenced_column : 'id_category',
+					on_update : 'CASCADE',
+					on_delete : 'CASCADE',
+				},
+				b : {
+					local : 'lang',
+					referenced_table : 'lang',
+					referenced_column : 'lang',
+					on_update : 'CASCADE',
+					on_delete : 'CASCADE',
+				},
+				c : {
+					local : 'id_company, id_user',
+					referenced_table : 'company_users',
+					referenced_column : 'id_company, id_user',
+					on_update : 'CASCADE',
+					on_delete : 'CASCADE',
+				},
+			}
+		}
+	});
+
 If your application uses a lot of models, I advice to bind all of these in a `models` variable, which will contain every models:
 
     var models = (function() {
