@@ -210,7 +210,8 @@ joli.model = function(options) {
   var defaults = {
     table: '',
     columns: {},
-    objectMethods: {}
+    objectMethods: {},
+    constraints : {}
   };
 
   if (options.methods) {
@@ -218,6 +219,8 @@ joli.model = function(options) {
       this[name] = method;
     }, this);
   }
+  
+  defaults.constraints = options.constraints;
 
   joli.setOptions.call(this, options, defaults);
   this.table = this.options.table;
@@ -383,13 +386,34 @@ joli.Models.prototype = {
   initialize: function() {
     joli.each(this.models, function(model, modelName) {
       var columns = [];
-
+	  var constraints = '';
       joli.each(model.options.columns, function(type, name) {
         columns.push(name + ' ' + type);
       });
-      var query = 'CREATE TABLE IF NOT EXISTS ' + modelName + ' (' + columns.join(', ') + ')';
+      var query = 'CREATE TABLE IF NOT EXISTS ' + modelName + ' (' + columns.join(', ');
+	  if (model.options.constraints && model.options.constraints.primary_key) {
+	  	query += ', PRIMARY KEY (' + model.options.constraints.primary_key + ')';
+	  }
+	  
+	  if (model.options.constraints && model.options.constraints.foreign_keys) {
+	  	joli.each(model.options.constraints.foreign_keys, function(value) {
+        	query += ', FOREIGN KEY (' + value.local + ') REFERENCES ' + value.referenced_table + ' ('+ value.referenced_column +') ON UPDATE ' + value.on_update + ' ON DELETE ' + value.on_delete;
+      	});
+	  }
+	  
+	  query += ')';
+	  
       joli.connection.execute(query);
     });
+  },
+  
+  reinstallDatabase : function() {
+    joli.each(this.models, function(model, modelName) {
+    	var query = 'DROP TABLE IF EXISTS ' + modelName;
+    	joli.connection.execute(query);
+    });
+    
+    joli.models.initialize();
   },
 
   migrate: function(version, migrationCallback) {
@@ -433,8 +457,7 @@ joli.query = function() {
     select_columns:  '*',
     set:             [],
     values:          [],
-    where:           null,
-    as:              null
+    where:           null
   };
 };
 
@@ -477,11 +500,6 @@ joli.query.prototype = {
 
   from: function(table) {
     this.data.from = table;
-    return this;
-  },
-
-  as: function(table) {
-    this.data.as = table;
     return this;
   },
 
@@ -622,9 +640,7 @@ joli.query.prototype = {
     var i;
     var record;
     var rowData;
-
-    // use the model specified by as() first, then from()
-    var model = joli.models.get(this.data.as || this.data.from);
+    var model = joli.models.get(this.data.from);
 
     while (rows.isValidRow()) {
       i = 0;
@@ -715,7 +731,7 @@ joli.query.prototype = {
       var i = 0;
 
       // replace question marks one at a time from the array
-      while (expression.indexOf('?') != -1 && value[i] !== undefined) {
+      while (expression.indexOf('?') != -1 && value[i]) {
         expression = expression.replace(/\?/i, '"' + value[i] + '"');
         i++;
       }
