@@ -9,18 +9,28 @@ joli.js is widely unit-tested. Go check [the demo application](https://github.co
 "joli" means in French "nice", "tiny". Just what joli.js tries to be.
 
 ## Download and install
-Just grab joli.js (a single file), and include it in your Titanium project using
+The source code of joli.js is [available on GitHub](https://github.com/xavierlacot/joli.js). Just grab it and include it in your Titanium project using either `Titanium.include()` or the CommonJS `require()`statement:
 
     Titanium.include('joli.js');
+    
+or (please note the missing ".js" suffix):
 
-The sources are [available on GitHub](https://github.com/xavierlacot/joli.js).
+    var joli = require('path/to/joli').connect('your_database_name');
+
+The latter integration mode must be prefered, as it helps sandboxing external libraries. Loading joli.js with `require()` will also allow to use several databases in the same application, which is not possible with `Ti.include()`:
+
+    var joliLibrary = require('path/to/joli');
+    var database1 = joliLibrary.connect('first_database');
+    var database2 = joliLibrary.connect('second_database');
 
 ## Configuration
 
 ### Database connection creation
-There is one single required step in the configuration of joli.js: configuring the database name. This can be done in only one line, which has to be put before every call to joli.js's API:
+If you included joli.js with `Titanium.include()`, there is one single required configuration step: configuring the database name. This can be done in only one line, which has to be put before every call to joli.js's API:
 
     joli.connection = new joli.Connection('your_database_name');
+    
+If you prefered to load joli.js as a CommonJS module, it is not necessary to write this configuration instruction. However, you still may want to change the database name of a connection, and in that case you'll want to use this command.
 
 ### Models configuration
 Prior inserting data and querying your models, you must declare these models. This is done by instantiating the class "joli.model":
@@ -252,6 +262,13 @@ There are at the moment three open source applications using joli.js:
 * [joli.js-demo](https://github.com/xavierlacot/joli.js-demo/) is a demo application, which contains the unit-tests for joli.js;
 * [joli.api.js-demo](https://github.com/xavierlacot/joli.api.js-demo/) is an Iphone Addressbook-like application, which content gets synchronized with web services. This application was built in a couple of hours and was presented a a demo app at [CodeStrong](http://codestrong.com/) in 2011.
 
+### Use several databases in the same application
+It is possible to use several databases with joli.js by loading the library as a CommonJS module:
+
+    var joliLibrary = require('path/to/joli');
+    var database1 = joliLibrary.connect('first_database');
+    var database2 = joliLibrary.connect('second_database');
+
 ## Credits and support
 joli.js has been developed by [Xavier Lacot](http://lacot.org/) and is
 licensed under the MIT license.
@@ -261,6 +278,7 @@ Please use GitHub in order to report bugs, but you may also ask for help on how 
 ## Changelog
 
 ### master
+* turned joli.js as a commonjs module
 * added a .as() method for building queries with join() (thanks nicjansma)
 * fixed a bug in the query where() method, when a value was 0 or '' (thanks nicjansma)
 * added a toArray() method on record instances
