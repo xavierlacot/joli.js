@@ -38,7 +38,7 @@ var joli = {
     getType: function(obj) {
         if (typeof obj === "undefined" || obj === null || (typeof obj === "number" && isNaN(obj))) {
             return false;
-        } else if (obj.constructor === Array) {
+        } else if (obj.constructor === Array || (Array.isArray && Array.isArray(obj))) {
             return "array";
         } else {
             return typeof obj;
