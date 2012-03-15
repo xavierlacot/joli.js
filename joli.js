@@ -792,7 +792,7 @@ joli.record.prototype = {
         this[key] = value;
         this._data[key] = value;
     },
-    toArray: function(data) {
+    toArray: function() {
         var result = [];
 
         joli.each(this._options.columns, function(colType, colName) {
