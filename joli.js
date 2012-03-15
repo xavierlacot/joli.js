@@ -802,6 +802,27 @@ joli.record.prototype = {
     }
 };
 
+joli.transaction = function(name) {
+    this.data = {
+        commited: false
+    };
+};
+
+joli.transaction.prototype = {
+    begin: function() {
+        joli.connection.execute('BEGIN;');
+    },
+
+    commit: function() {
+        if (this.data.commited) {
+            throw new Error('The transaction was already commited!');        
+        }
+
+        joli.connection.execute('COMMIT;');  
+        this.data.commited = true;      
+    },
+};
+
 /**
  * In case joli.js is loaded as a CommonJS module
  */
