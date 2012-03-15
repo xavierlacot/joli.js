@@ -152,7 +152,7 @@ joli.Connection = function(database) {
 
 joli.Connection.prototype = {
     execute: function(query) {
-        // Titanium.API.log('debug', query);
+        // Titanium.API.log('info', query);
         return this.database.execute(query);
     },
     lastInsertRowId: function() {
@@ -763,7 +763,11 @@ joli.record.prototype = {
             data.originalData = this._originalData;
             this._options.table.save(data);
         } else if (this.isNew()) {
-            this._data.id = this._options.table.save(data);
+            var rowid = this._options.table.save(data);
+            
+            if (!data.id) {
+                this._data.id = rowid;
+            }
         }
 
         // overwrite original data so it is no longer "dirty" OR so it is no
