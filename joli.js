@@ -351,7 +351,11 @@ var joliCreator = function() {
 
     joli.Models.prototype = {
         get: function(table) {
-            return this.models[table];
+            if (table !== undefined) {
+                return this.models[table];
+            } else {
+                return this.models;
+            }
         },
         has: function(table) {
             if (this.models[table]) {
