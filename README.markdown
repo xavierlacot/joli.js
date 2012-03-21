@@ -234,6 +234,14 @@ In some cases however, you will find this way of querying your models just too l
       order: ['last_name desc', 'first_name asc']
     });
 
+If you need to execute a query whose results can't be mapped to a model (for example, using `GROUP BY` and `COUNT(*)` statements), you can use the `asDynamic()` function.  For example, this query would find the count of humans in each city:
+
+    var q = new joli.query()
+      .select('city, COUNT(*) as count')
+      .from('human')
+      .groupBy('city')
+      .asDynamic()
+      .execute();
 
 ## Internals
 joli.js is made of several classes:
@@ -280,6 +288,7 @@ Please use GitHub in order to report bugs, but you may also ask for help on how 
 ### master
 * turned joli.js as a commonjs module
 * added a .as() method for building queries with join() (thanks nicjansma)
+* added a .asDynamic() method query results that aren't mapped to a model (thanks nicjansma)
 * fixed a bug in the query where() method, when a value was 0 or '' (thanks nicjansma)
 * added a toArray() method on record instances
 * fixed missing semicolon (jslint inside)
