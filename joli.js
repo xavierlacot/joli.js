@@ -407,6 +407,7 @@ var joliCreator = function() {
     joli.query = function() {
         this.data = {
             as: null,
+            asDynamic: false,
             from: null,
             join: [],
             limit: null,
@@ -458,6 +459,10 @@ var joliCreator = function() {
         as: function(table) {
             this.data.as = table;
             return this;
+        },
+        asDynamic: function() {
+            this.data.asDynamic = true;
+            return this;  
         },
         getCount: function(rows) {
             var result;
@@ -590,8 +595,12 @@ var joliCreator = function() {
             var record;
             var rowData;
 
-            // use the model specified by as() first, then from()
-            var model = joli.models.get(this.data.as || this.data.from);
+            // get the model if this isn't a dynamic query (eg, aggregate via group by) 
+            var model;
+            if (!this.data.asDynamic) {
+                // use the model specified by as() first, then from()
+                model = joli.models.get(this.data.as || this.data.from);
+            }
 
             while (rows.isValidRow()) {
                 i = 0;
@@ -602,7 +611,14 @@ var joliCreator = function() {
                     i++;
                 }
 
-                result.push(model.newRecord().fromArray(rowData));
+                if (model) {
+                    result.push(model.newRecord().fromArray(rowData));
+                } else {
+                    // if we don't have a matching model, either because the right model isn't
+                    // specified, or because we have a dynamic query, just create a property bag
+                    // from the fields 
+                    result.push(rowData);
+                }
                 rows.next();
             }
 
