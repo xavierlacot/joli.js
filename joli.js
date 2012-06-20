@@ -855,7 +855,7 @@ var joli = joliCreator();
  * var joli = require('joli').connect('your_database_name', '/path/to/database.sqlite');
  */
 if (typeof exports === 'object' && exports) {
-    exports.connect: function(database, file) {
+    exports.connect = function(database, file) {
         var joli = joliCreator();
 
         if (database) {
