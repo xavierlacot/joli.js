@@ -145,13 +145,22 @@ var joliCreator = function() {
     /**
      * Connection
      */
-    joli.Connection = function(database) {
+    joli.Connection = function(database, file) {
         this.dbname = database;
-        this.database = Titanium.Database.open(this.dbname);
+
+        if (file) {
+          this.database = Titanium.Database.install(file, this.dbname);
+        } else {
+          this.database = Titanium.Database.open(this.dbname);
+        }
+
         this.database.execute('PRAGMA read_uncommitted=true');
     };
 
     joli.Connection.prototype = {
+        disconnect: function() {
+            this.database.close();
+        },
         execute: function(query) {
             // Titanium.API.log('info', query);
             return this.database.execute(query);
@@ -832,7 +841,6 @@ var joliCreator = function() {
 };
 
 
-
 /**
  * Global joli object for non-CommonJS usage:
  *  Ti.include('joli.js);
@@ -842,15 +850,20 @@ var joli = joliCreator();
 
 
 /**
- * In case joli.js is loaded as a CommonJS module:
+ * In case joli.js is loaded as a CommonJS module
  * var joli = require('joli').connect('your_database_name');
+ * var joli = require('joli').connect('your_database_name', '/path/to/database.sqlite');
  */
 if (typeof exports === 'object' && exports) {
-    exports.connect = function(database) {
+    exports.connect: function(database, file) {
         var joli = joliCreator();
 
         if (database) {
-            joli.connection = new joli.Connection(database);
+            if (file) {
+                joli.connection = new joli.Connection(database, file);
+            } else {
+                joli.connection = new joli.Connection(database);
+            }
         }
 
         return joli;

@@ -12,7 +12,7 @@ joli.js is widely unit-tested. Go check [the demo application](https://github.co
 The source code of joli.js is [available on GitHub](https://github.com/xavierlacot/joli.js). Just grab it and include it in your Titanium project using either `Titanium.include()` or the CommonJS `require()`statement:
 
     Titanium.include('joli.js');
-    
+
 or (please note the missing ".js" suffix):
 
     var joli = require('path/to/joli').connect('your_database_name');
@@ -23,13 +23,18 @@ The latter integration mode must be prefered, as it helps sandboxing external li
     var database1 = joliLibrary.connect('first_database');
     var database2 = joliLibrary.connect('second_database');
 
+It is also possible to install existing databases bundled with the application:
+
+    var joli = require('path/to/joli').connect('your_database_name', '/path/to/database.sqlite');
+
+
 ## Configuration
 
 ### Database connection creation
 If you included joli.js with `Titanium.include()`, there is one single required configuration step: configuring the database name. This can be done in only one line, which has to be put before every call to joli.js's API:
 
     joli.connection = new joli.Connection('your_database_name');
-    
+
 If you prefered to load joli.js as a CommonJS module, it is not necessary to write this configuration instruction. However, you still may want to change the database name of a connection, and in that case you'll want to use this command.
 
 ### Models configuration
@@ -270,8 +275,7 @@ It is possible to use several databases with joli.js by loading the library as a
     var database2 = joliLibrary.connect('second_database');
 
 ## Credits and support
-joli.js has been developed by [Xavier Lacot](http://lacot.org/) and is
-licensed under the MIT license.
+joli.js has been developed by [Xavier Lacot](http://lacot.org/) and is licensed under the MIT license. The joli.js project is sponsored by [JoliCode](http://jolicode.com/).
 
 Please use GitHub in order to report bugs, but you may also ask for help on how to use joli.js by sending me a mail directly. My email address is xavier@lacot.org.
 
@@ -279,6 +283,7 @@ Please use GitHub in order to report bugs, but you may also ask for help on how 
 
 ### master
 * turned joli.js as a commonjs module
+* added the possibility to install an existing database bundled with the app
 * added a .as() method for building queries with join() (thanks nicjansma)
 * fixed a bug in the query where() method, when a value was 0 or '' (thanks nicjansma)
 * added a toArray() method on record instances
