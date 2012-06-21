@@ -722,14 +722,14 @@ var joliCreator = function() {
 
     joli.record.prototype = {
         destroy: function() {
-            if (!this.id) {
+            if (typeof this.id === 'undefined') {
                 throw ("Unsaved record cannot be destroyed");
             } else {
                 this._options.table.deleteRecords(this.id);
             }
         },
         fromArray: function(data) {
-            if (data.id) {
+            if (typeof data.id !== 'undefined') {
                 this._originalData = {
                     id: data.id
                 };
@@ -763,7 +763,7 @@ var joliCreator = function() {
                 return false;
             }
 
-            return !(this.id && joli.toQueryString(this._data) === joli.toQueryString(this._originalData));
+            return !((typeof this.id !== 'undefined') && joli.toQueryString(this._data) === joli.toQueryString(this._originalData));
         },
         save: function() {
             var data = {
