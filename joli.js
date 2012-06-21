@@ -5,7 +5,7 @@ var joliCreator = function() {
 
             switch (joli.getType(collection)) {
                 case "array":
-                    for ( i = 0, l = collection.length; i < l; i++) {
+                    for (i = 0, l = collection.length; i < l; i++) {
                         iterator.call(bind, collection[i], i);
                     }
                     break;
@@ -767,7 +767,7 @@ var joliCreator = function() {
         },
         save: function() {
             var data = {
-                data: this._data,
+                data: this._data
             };
 
             if (this.isChanged()) {
@@ -831,7 +831,7 @@ var joliCreator = function() {
 
             joli.connection.execute('COMMIT;');
             this.data.commited = true;
-        },
+        }
     };
 
     return joli;
@@ -864,5 +864,5 @@ if (typeof exports === 'object' && exports) {
         }
 
         return joli;
-    }
+    };
 }
