@@ -281,7 +281,7 @@ Please use GitHub in order to report bugs, but you may also ask for help on how 
 
 ## Changelog
 
-### master
+### Version 0.4 2012-06-21
 * turned joli.js as a commonjs module
 * added the possibility to install an existing database bundled with the app
 * added a .as() method for building queries with join() (thanks nicjansma)
