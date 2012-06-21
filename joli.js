@@ -715,11 +715,9 @@ var joliCreator = function() {
 
     joli.record = function(table) {
         this._options = {
-            table: table,
-            columns: table.getColumns()
+            table: table
         };
         this._data = {};
-        this._metadata = {};
     };
 
     joli.record.prototype = {
@@ -745,7 +743,7 @@ var joliCreator = function() {
                 };
             }
 
-            joli.each(this._options.columns, function(colType, colName) {
+            joli.each(this._options.table.getColumns(), function(colType, colName) {
                 this[colName] = null;
                 this[colName] = data[colName];
                 this._data[colName] = null;
@@ -770,7 +768,6 @@ var joliCreator = function() {
         save: function() {
             var data = {
                 data: this._data,
-                metadata: this._metadata
             };
 
             if (this.isChanged()) {
@@ -789,7 +786,7 @@ var joliCreator = function() {
             this._originalData = {};
             var newData = {};
 
-            joli.each(this._options.columns, function(colType, colName) {
+            joli.each(this._options.table.getColumns(), function(colType, colName) {
                 this._originalData[colName] = this._data[colName];
                 newData[colName] = this._data[colName];
                 this[colName] = this._data[colName];
@@ -809,7 +806,7 @@ var joliCreator = function() {
         toArray: function() {
             var result = [];
 
-            joli.each(this._options.columns, function(colType, colName) {
+            joli.each(this._options.table.getColumns(), function(colType, colName) {
                 result[colName] = this._data[colName];
             }, this);
             return result;
