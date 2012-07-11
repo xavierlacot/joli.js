@@ -546,7 +546,7 @@ var joliCreator = function() {
             return this;
         },
         having: function(expression, value) {
-            if (null !== this.data.where) {
+            if (null !== this.data.having) {
                 this.data.having += ' and ';
             } else {
                 this.data.having = '';
