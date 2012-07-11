@@ -417,6 +417,7 @@ var joliCreator = function() {
         this.data = {
             as: null,
             from: null,
+            having: null,
             join: [],
             limit: null,
             operation: null,
@@ -522,6 +523,10 @@ var joliCreator = function() {
                 query += ' group by ' + this.data.groupBy.join(', ');
             }
 
+            if (this.data.having) {
+                query += ' having ' + this.data.having;
+            }
+
             if (this.data.order.length > 0) {
                 query += ' order by ' + this.data.order.join(', ');
             }
@@ -538,6 +543,30 @@ var joliCreator = function() {
             }
 
             this.data.groupBy = group;
+            return this;
+        },
+        having: function(expression, value) {
+            if (null !== this.data.where) {
+                this.data.having += ' and ';
+            } else {
+                this.data.having = '';
+            }
+
+            // handle replacing multiple values
+            if ('array' === joli.getType(value)) {
+                var i = 0;
+
+                // replace question marks one at a time from the array
+                while (expression.indexOf('?') !== -1 && value[i] !== undefined) {
+                    expression = expression.replace(/\?/i, '"' + value[i] + '"');
+                    i++;
+                }
+
+                this.data.having += expression;
+            } else {
+                this.data.having += expression.replace(/\?/gi, '"' + value + '"');
+            }
+
             return this;
         },
         hydrate: function(rows, hydratationMode) {
