@@ -529,7 +529,7 @@ var joliCreator = function() {
                 case 'update':
                     return 'update ' + this.data.from + ' set ' + this.data.set.join(', ');
                 default:
-                    throw ("Operation type Error. joli.query operation type must be an insert, a delete, a select or an update.");
+                    throw ("Operation type Error. joli.query operation type must be an insert, a delete, a select , alter or an update.");
             }
         },
         getQuery : function() {
