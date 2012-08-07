@@ -239,6 +239,24 @@ In some cases however, you will find this way of querying your models just too l
       order: ['last_name desc', 'first_name asc']
     });
 
+### Data retrieval for queries with no specific model (eg, GROUP BY)
+
+Some query results can't be mapped back to a Joli model.  For example, when using a `GROUP BY` statement:
+
+    SELECT city, COUNT(*) as count
+    FROM human
+    GROUP BY city
+
+The rows returned by the above query are not Joli models, but simple `[city, count]` tuples.
+    
+To avoid having Joli try to map the query results to a model, you can pass a string parameter `"array"` to the 
+`.execute()` function to have the results returned as an array of simple objects:
+
+    var q = new joli.query()
+        .select('city, COUNT(*) as count')
+        .from('human')
+        .groupBy('city')
+        .execute("array");
 
 ## Internals
 joli.js is made of several classes:
