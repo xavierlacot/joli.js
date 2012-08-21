@@ -747,6 +747,7 @@ var joliCreator = function() {
             table: table
         };
         this._data = {};
+        this._metadata = {};
     };
 
     joli.record.prototype = {
@@ -796,7 +797,8 @@ var joliCreator = function() {
         },
         save: function() {
             var data = {
-                data: this._data
+                data: this._data,
+                metadata: this._metadata
             };
 
             if (this.isChanged()) {
