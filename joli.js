@@ -122,6 +122,9 @@ var joliCreator = function() {
                 return "NULL";
             } else {
                 if (joli.getType(val) === "string") {
+                    if (val.indexOf('SQL(') === 0) {
+                        return val.substring(4, val.length - 1);
+                    }
                     // escape single quotes and dollar signs.
                     // quotes are escaped for SQLite
                     val = val.replace(/'/g, "''");
@@ -799,11 +802,13 @@ var joliCreator = function() {
                 data: this._data
             };
 
+            var rowid, isNew = true;
             if (this.isChanged()) {
+                isNew = false;
                 data.originalData = this._originalData;
                 this._options.table.save(data);
             } else if (this.isNew()) {
-                var rowid = this._options.table.save(data);
+                rowid = this._options.table.save(data);
 
                 if (!data.id) {
                     this._data.id = rowid;
@@ -813,12 +818,18 @@ var joliCreator = function() {
             // overwrite original data so it is no longer "dirty" OR so it is no
             // longer new
             this._originalData = {};
-            var newData = {};
+            var newData = !isNew ? {} : new joli.query().select().from(this._options.table.table).where('rowid = ?', rowid).execute('array')[0];
 
             joli.each(this._options.table.getColumns(), function(colType, colName) {
-                this._originalData[colName] = this._data[colName];
-                newData[colName] = this._data[colName];
-                this[colName] = this._data[colName];
+                if (isNew) {
+                    this._originalData[colName] = isNew ? newData[colName] : this._data[colName];
+                    this[colName] = newData[colName];
+                }
+                else {
+                    this._originalData[colName] = this._data[colName];
+                    newData[colName] = this._data[colName];
+                    this[colName] = this._data[colName];
+                }                
             }, this);
 
             this._data = newData;
