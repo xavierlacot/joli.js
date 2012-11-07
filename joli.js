@@ -242,6 +242,12 @@ var joliCreator = function() {
                     q.where(field, value);
                 });
             }
+            
+            if (constraints.whereIn) {
+                joli.each(constraints.whereIn, function(value, field) {
+                    q.whereIn(field, value);
+                });
+            }
 
             if (constraints.order) {
                 q.order(constraints.order);
@@ -263,6 +269,12 @@ var joliCreator = function() {
             if (constraints.where) {
                 joli.each(constraints.where, function(value, field) {
                     q.where(field, value);
+                });
+            }
+            
+            if (constraints.whereIn) {
+                joli.each(constraints.whereIn, function(value, field) {
+                    q.whereIn(field, value);
                 });
             }
 
