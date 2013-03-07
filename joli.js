@@ -493,6 +493,8 @@ var joliCreator = function() {
                     return 'delete from ' + this.data.from;
                 case 'insert_into':
                     return 'insert into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
+                case 'replace':
+                    return 'replace into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
                 case 'select':
                     var join = '';
 
@@ -509,7 +511,7 @@ var joliCreator = function() {
                 case 'update':
                     return 'update ' + this.data.from + ' set ' + this.data.set.join(', ');
                 default:
-                    throw ("Operation type Error. joli.query operation type must be an insert, a delete, a select or an update.");
+                    throw ("Operation type Error. joli.query operation type must be an insert, a delete, a select, a replace or an update.");
             }
         },
         getQuery: function() {
@@ -665,6 +667,11 @@ var joliCreator = function() {
             }
 
             this.data.order = order;
+            return this;
+        },
+        replace: function(table) {
+            this.data.operation = 'replace';
+            this.data.from = table;
             return this;
         },
         select: function(columns) {
