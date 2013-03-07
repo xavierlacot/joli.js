@@ -299,12 +299,15 @@ Please use GitHub in order to report bugs, but you may also ask for help on how 
 
 ## Changelog
 
-### Version 0.4 2012-06-21
+### Master
+* added the `replace()` for building queries (thanks benjaminVadon)
+
+### Version 0.4 - 2012-06-21
 * turned joli.js as a commonjs module
 * added the possibility to install an existing database bundled with the app
-* added a .as() method for building queries with join() (thanks nicjansma)
-* fixed a bug in the query where() method, when a value was 0 or '' (thanks nicjansma)
-* added a toArray() method on record instances
+* added a `as()` method for building queries with `join()` (thanks nicjansma)
+* fixed a bug in the query `where()` method, when a value was 0 or '' (thanks nicjansma)
+* added a `toArray()` method on record instances
 * fixed missing semicolon (jslint inside)
 * adding optional migration callback to make migrations more general in usage (thanks Anthony Roldan)
 * updated the documentation
@@ -314,10 +317,10 @@ Please use GitHub in order to report bugs, but you may also ask for help on how 
 * selection now return object collections
 * added support for several hydratation modes
 * joli.js now validates through [jshint](http://jshint.com/)
-* introduced joli.model.truncate(), which empties the table associated to a model
-* introduced joli.record.get(), which allows to acces one record's properties
-* made joli.query.join() able to complete the joined field names in the format table.field
-* fixed joli.query.whereIn() which was buggy for textual values
+* introduced `joli.model.truncate()`, which empties the table associated to a model
+* introduced `joli.record.get()`, which allows to acces one record's properties
+* made `joli.query.join()` able to complete the joined field names in the format table.field
+* fixed `joli.query.whereIn()` which was buggy for textual values
 * fixed a variable-reference bug in joli.record.save(), which led to an inconsistent behavior of joli.record.isChanged()
 
 ### Version 0.2 - 2011-06-20
