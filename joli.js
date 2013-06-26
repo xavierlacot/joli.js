@@ -754,6 +754,7 @@ var joliCreator = function() {
             table: table
         };
         this._data = {};
+        this._originalData = null;
     };
 
     joli.record.prototype = {
@@ -765,15 +766,14 @@ var joliCreator = function() {
             }
         },
         fromArray: function(data) {
+            var wasNew = this.isNew ? this.isNew() : true;
+
             if (typeof data.id !== 'undefined') {
-                this._originalData = {
-                    id: data.id
-                };
+                this._originalData = this._originalData || {};
                 this.isNew = function() {
                     return false;
                 };
-            } else {
-                this._originalData = null;
+            } else if (wasNew) {
                 this.isNew = function() {
                     return true;
                 };
@@ -785,7 +785,7 @@ var joliCreator = function() {
                 this._data[colName] = null;
                 this._data[colName] = data[colName];
 
-                if (this._originalData && this.isNew()) {
+                if ((this._originalData && !this._originalData[colName]) || this.isNew()) {
                     this._originalData[colName] = data[colName];
                 }
             }, this);
