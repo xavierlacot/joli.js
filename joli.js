@@ -251,6 +251,10 @@ var joliCreator = function() {
                 q.limit(constraints.limit);
             }
 
+            if (constraints.limit && constraints.offset) {
+                q.offset(constraints.offset);
+            }
+
             return q.execute();
         },
         count: function(constraints) {
@@ -539,6 +543,10 @@ var joliCreator = function() {
                 query += ' limit ' + this.data.limit;
             }
 
+            if (this.data.limit && this.data.offset) {
+                query += ' offset ' + this.data.offset;
+            }
+
             return query;
         },
         groupBy: function(group) {
@@ -661,6 +669,10 @@ var joliCreator = function() {
         },
         limit: function(limit) {
             this.data.limit = limit;
+            return this;
+        },
+        offset: function(offset) {
+            this.data.offset = offset;
             return this;
         },
         order: function(order) {
