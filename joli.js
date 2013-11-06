@@ -499,6 +499,8 @@ var joliCreator = function() {
                     return 'insert into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
                 case 'replace':
                     return 'replace into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
+                case 'insert_replace':
+                    return 'insert or replace into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
                 case 'select':
                     var join = '';
 
@@ -683,6 +685,11 @@ var joliCreator = function() {
         },
         replace: function(table) {
             this.data.operation = 'replace';
+            this.data.from = table;
+            return this;
+        },
+        insertReplace: function(table) {
+            this.data.operation = 'insert_replace';
             this.data.from = table;
             return this;
         },
