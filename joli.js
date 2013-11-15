@@ -453,6 +453,7 @@ var joliCreator = function() {
                     rows = joli.connection.execute(query);
                     return this.getCount(rows);
                 case 'insert_into':
+                case 'insert_replace':
                     joli.connection.execute(query);
                     return joli.connection.lastInsertRowId();
                 case 'select':
@@ -497,6 +498,8 @@ var joliCreator = function() {
                     return 'delete from ' + this.data.from;
                 case 'insert_into':
                     return 'insert into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
+                case 'insert_replace':
+                    return 'insert or replace into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
                 case 'replace':
                     return 'replace into ' + this.data.from + ' (' + this.data.set.join(', ') + ') values (' + this.data.values.join(', ') + ')';
                 case 'select':
@@ -658,6 +661,11 @@ var joliCreator = function() {
         },
         insertInto: function(table) {
             this.data.operation = 'insert_into';
+            this.data.from = table;
+            return this;
+        },
+        insertReplace: function(table) {
+            this.data.operation = 'insert_replace';
             this.data.from = table;
             return this;
         },
