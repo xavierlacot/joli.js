@@ -605,13 +605,7 @@ var joliCreator = function() {
                 return result;
             }
 
-            var fieldCount;
-
-            if (Titanium.Platform.name !== 'android') {
-                fieldCount = rows.fieldCount();
-            } else {
-                fieldCount = rows.fieldCount;
-            }
+            var fieldCount = rows.fieldCount;
 
             switch (hydratationMode) {
                 case 'array':
