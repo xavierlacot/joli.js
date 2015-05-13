@@ -794,8 +794,8 @@ var joliCreator = function() {
         fromArray: function(data) {
             var wasNew = this.isNew ? this.isNew() : true;
 
+            this._originalData = this._originalData || {};
             if (typeof data.id !== 'undefined') {
-                this._originalData = this._originalData || {};
                 this.isNew = function() {
                     return false;
                 };
