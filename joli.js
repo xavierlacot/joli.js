@@ -817,6 +817,30 @@ var joliCreator = function() {
             }, this);
             return this;
         },
+        
+        /* For bulk values setting instead of using set in a loop */
+        setFromArray: function(data) {
+            var wasNew = this.isNew ? this.isNew() : true;
+
+            if (typeof data.id !== 'undefined') {
+                this._originalData = this._originalData || {};
+                this.isNew = function() {
+                    return false;
+                };
+            } else if (wasNew) {
+                this.isNew = function() {
+                    return true;
+                };
+            }
+
+            joli.each(this._options.table.getColumns(), function(colType, colName) {
+                this[colName] = null;
+                this[colName] = data[colName];
+                this._data[colName] = null;
+                this._data[colName] = data[colName];
+            }, this);
+            return this;
+        },
         get: function(key) {
             return this[key];
         },
