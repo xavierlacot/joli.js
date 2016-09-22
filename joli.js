@@ -45,6 +45,21 @@ var joliCreator = function() {
                 return typeof obj;
             }
         },
+        isUndefined: function(obj) {
+            return obj === void 0;
+        },
+        isDefined: function(obj) {
+            return !(obj === void 0);
+        },
+        isObject: function(obj) {
+            return joli.getType(obj) === "object";
+        },
+        isArray: function(obj) {
+            return joli.getType(obj) === "array";
+        },
+        isFunction: function(obj) {
+            return joli.getType(obj) === "function"
+        },
         jsonParse: function(json) {
             return JSON.parse(json);
         },
@@ -242,7 +257,7 @@ var joliCreator = function() {
                     q.where(field, value);
                 });
             }
-            
+
             if (constraints.whereIn) {
                 joli.each(constraints.whereIn, function(value, field) {
                     q.whereIn(field, value);
@@ -275,7 +290,7 @@ var joliCreator = function() {
                     q.where(field, value);
                 });
             }
-            
+
             if (constraints.whereIn) {
                 joli.each(constraints.whereIn, function(value, field) {
                     q.whereIn(field, value);
