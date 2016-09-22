@@ -377,6 +377,40 @@ var joliCreator = function() {
 
             return q.execute();
         },
+        // load function for bulk loading many records at once and
+        // is optimizable with transaction via useTransaction flag (consider as default?)
+        load: function(recordsDataArray, options, callback) {
+          var transaction = false;
+
+          if (options && options.purgeFirst) {
+            this.truncate();
+          }
+
+          // use a transaction around the collection of queries to optimize large record set
+          if (options && options.useTransaction) {
+            transaction = new joli.transaction("load")
+            transaction.begin();
+          }
+
+          // determine if the record exists already and if we need to create it or update it
+          joli.each(recordsDataArray, function(recordData, index) {
+            var record = false;
+            if (record = this.findOneById(recordData["id"])) {
+              record.fromArray(recordData);
+            } else {
+              record = this.newRecord(recordData);
+            }
+            (record) && (record.save());
+          }, this);
+
+          if (transaction) {
+            transaction.commit();
+          }
+
+          if (joli.isFunction(callback)) {
+            callback();
+          }
+        },
         truncate: function() {
             new joli.query().destroy().from(this.table).execute();
         }
