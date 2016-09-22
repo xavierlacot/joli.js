@@ -413,6 +413,15 @@ var joliCreator = function() {
         },
         truncate: function() {
             new joli.query().destroy().from(this.table).execute();
+        },
+        // add options to post model construction - for adding methods later
+        addOptions: function(options) {
+           if (options.methods) {
+               joli.each(options.methods, function(method, name) {
+                   this[name] = method;
+               }, this);
+           }
+          joli.setOptions.call(this, options, this.options);
         }
     };
 
