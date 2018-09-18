@@ -45,6 +45,7 @@ var joliCreator = function() {
                 return typeof obj;
             }
         },
+        // [Logical Labs] add some convenience type test functions
         isUndefined: function(obj) {
             return obj === void 0;
         },
@@ -136,6 +137,13 @@ var joliCreator = function() {
             if (!joli.getType(val)) {
                 return "NULL";
             } else {
+                // [Logical Labs] allow for nested data (objects, arrays) in val
+                // to be serialized as a string for faster db interaction of large
+                // amounts of data - requires you to handle (jsonParse) the data
+                // after its retrieved when the data is expected to be serialized
+                if ((joli.isObject(val)) || (joli.isArray(val))) {
+                  val = JSON.stringify(val);
+                }
                 if (joli.getType(val) === "string") {
                     // escape single quotes and dollar signs.
                     // quotes are escaped for SQLite
@@ -163,13 +171,16 @@ var joliCreator = function() {
     joli.Connection = function(database, file) {
         this.dbname = database;
 
+        Ti.API.debug("opening database for connection using database:"+database+", file:"+file);
         if (file) {
           this.database = Titanium.Database.install(file, this.dbname);
         } else {
           this.database = Titanium.Database.open(this.dbname);
         }
+        Ti.API.debug("should be opened...");
 
         this.database.execute('PRAGMA read_uncommitted=true');
+        Ti.API.debug("after PRAGMA read_uncommitted=true...");
     };
 
     joli.Connection.prototype = {
@@ -245,6 +256,10 @@ var joliCreator = function() {
     };
 
     joli.model.prototype = {
+        // return a query object for this model
+        query: function() {
+          return new joli.query().from(this.table);
+        },
         all: function(constraints) {
             var q = new joli.query().select().from(this.table);
 
@@ -330,6 +345,19 @@ var joliCreator = function() {
                 return result[0];
             }
         },
+        // testing extending joli model with multiple where conditions and order together
+        findOneUsingCompoundWhereOrderedBy: function(field,value,order) {
+          var q = new joli.query().select().from(this.table);
+          joli.each(constraints.where, function(value, field) {
+              q.where(field, value);
+          });
+          var result = q.order(order).limit(1).execute();
+          if (result.length === 0) {
+              return false;
+          } else {
+              return result[0];
+          }
+        },
         findOneById: function(value) {
             return this.findOneBy('id', value);
         },
@@ -377,7 +405,7 @@ var joliCreator = function() {
 
             return q.execute();
         },
-        // load function for bulk loading many records at once and
+        // [Logical Labs] function for bulk loading many records at once and
         // is optimizable with transaction via useTransaction flag (consider as default?)
         load: function(recordsDataArray, options, callback) {
           var transaction = false;
@@ -414,7 +442,7 @@ var joliCreator = function() {
         truncate: function() {
             new joli.query().destroy().from(this.table).execute();
         },
-        // add options to post model construction - for adding methods later
+        // [Logical Labs] add options to post model construction - for adding methods later
         addOptions: function(options) {
            if (options.methods) {
                joli.each(options.methods, function(method, name) {
