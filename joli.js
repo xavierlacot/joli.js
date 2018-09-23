@@ -165,30 +165,108 @@ var joliCreator = function() {
         }
     };
 
+    // define available titanium database modules
+    joli.standardDatabaseModule = Titanium.Database;
+
+    // database encyrption is handled by sqlcipher and via a module
+    // Requires module for handling encrypted database installed in app
+
+    // For iOS, we don't need to use the javascript interface for the module, so long as it is at least included in the project
+    // It appeaars that so long as the project is built with the module we can just go around the interface and use
+    // the Titanium.Database interface and set our password manually using sqlcipher's query method PRAGMA key = '<password>'
+    // after opening the database
+    // read above
+    joli.encryptedDatabaseModule = Ti.Platform.name === 'android' ? require('appcelerator.encrypteddatabase') : Ti.Database;
+    // read below
+    // Notes for doing the above: on iOS when using the encrypted database module's javascript interfce (for open mainly)
+    // on subsequent opens of different databases for the circuitDB or coompanyDB, it mistakenly tries to run cipher migrate
+    // and for some reason that fails when attaching the database (one of the steps in the sqlcipher openAndMigrate method)
+    // 1) I don't understand why the module thinks the cipher migration is necessary because the module version where this was
+    // initially required is well past the internal setting of the version (at least 2.0.4 internally set)
+    // 2) When the slqcipher method (openAndMigrate) runs, it is not clear to me why it is failing at the attach database step
+    // 3) in both 1 and 2 above, it is not clear why it works initially but when switching to a different database it fails
+    // (sometimes takes a few changes for the failure to show up)
+
     /**
      * Connection
      */
-    joli.Connection = function(database, file) {
-        this.dbname = database;
-
-        Ti.API.debug("opening database for connection using database:"+database+", file:"+file);
-        if (file) {
-          this.database = Titanium.Database.install(file, this.dbname);
-        } else {
-          this.database = Titanium.Database.open(this.dbname);
+    joli.Connection = function(database, file, password, readonly) {
+        var databaseModule,
+        isAndroid = Titanium.Platform.osname === 'android',
+        isIOS = (Ti.Platform.osname === 'iphone' || Ti.Platform.osname === 'ipad');
+        // If iOS and a file object has been passed in, extract file basename wihout extension to use
+        if (isIOS && typeof database === 'object') {
+          database = database.name.replace(/(.*)\.(.*?)$/, "$1");
         }
-        Ti.API.debug("should be opened...");
-
+        // password can be blank, just not undefined
+        if (arguments.length < 3 || typeof password === 'undefined') {
+          Ti.API.debug("Password is undefined for db "+database);
+          this.encrypted = false;
+        } else {
+          // don't show password in log when built for production release!! - comment the line out below
+          // Ti.API.debug("Password is "+password+" for db "+database);
+          this.encrypted = true;
+        }
+        // this.readonly is only for Android due to encrypted database module limitation in android
+        if (arguments.length < 4 || typeof readonly === 'undefined') {
+          this.readonly = false;
+        } else {
+          this.readonly = readonly;
+        }
+        // if connection isn't to be for an encrypted database (detected by undefined password), use standard module
+        if (!this.encrypted) {
+          databaseModule = joli.standardDatabaseModule;
+        } else {
+          databaseModule = joli.encryptedDatabaseModule;
+          // for encrpted database model, need to set the password in the module before connecting
+          if (joli.encryptedDatabaseModule !== joli.standardDatabaseModule) {
+            // don't show password in log when built for production release!! - comment the line out below
+            // Ti.API.debug("Setting password using "+password+" for db "+database);
+            databaseModule.password = password;
+          }
+        }
+        // if a file argument is defined, install the database from the file to standard location
+        if (file) {
+          Ti.API.debug("Installing db "+database);
+          this.database = databaseModule.install(file, database);
+        // if file is not defined, the database is opened from its existing location
+        } else {
+          if (isAndroid && this.encrypted && !this.readonly && typeof database === 'object') {
+            // If using encyrpted database on Android and not wanting readonly, need to make sure
+            // we pass in an absolute file path as string, not a file object as there is currently a limitation
+            // in the encrypted database module where if the argument is a fileproxy object, readonly will be true
+            // Also, need to make sure it is an absolute path without the protocol prepended
+            var dbFilePath = database.nativePath.replace('file://','');
+            this.database = databaseModule.open(dbFilePath);
+          } else {
+            Ti.API.debug("Opening db "+database);
+            this.database = databaseModule.open(database);
+          }
+        }
+        // For iOS, we need to set the encryption key after connecting to the database if we aren't using
+        // the encrypted database module where the password would have been set as a property on the module
+        if (isIOS && this.encrypted && joli.encryptedDatabaseModule === joli.standardDatabaseModule) {
+          // don't show password in log when built for production release!! - comment the line out below
+          // Ti.API.debug("Setting password using "+password+" for db "+database);
+          this.database.execute("PRAGMA key = '"+password+"'");
+        }
         this.database.execute('PRAGMA read_uncommitted=true');
-        Ti.API.debug("after PRAGMA read_uncommitted=true...");
+        // run a benign test that queries can be executed in the database (to test for access)
+        // this is the same test that sqlcipher's android database library uses when connecting
+        // so effectively this is here for iOS so we can have an exception thrown at connection
+        // if we don't have a readable database (i.e. the password failed to decrypt)
+        Ti.API.debug("Testing db "+database);
+        this.database.execute("select count(*) from sqlite_master")
+        Ti.API.debug("Database file opened: "+this.database.file.nativePath)
     };
 
     joli.Connection.prototype = {
         disconnect: function() {
-            this.database.close();
+          Ti.API.info("Closing database "+this.database.file.nativePath);
+          this.database.close();
         },
         execute: function(query) {
-            // Titanium.API.log('info', query);
+            // Ti.API.debug(query);
             return this.database.execute(query);
         },
         lastInsertRowId: function() {
@@ -1000,14 +1078,14 @@ var joli = joliCreator();
  * var joli = require('joli').connect('your_database_name', '/path/to/database.sqlite');
  */
 if (typeof exports === 'object' && exports) {
-    exports.connect = function(database, file) {
+    exports.connect = function(database, file, password,readonly) {
         var joli = joliCreator();
 
         if (database) {
             if (file) {
-                joli.connection = new joli.Connection(database, file);
+                joli.connection = new joli.Connection(database, file, password,readonly);
             } else {
-                joli.connection = new joli.Connection(database);
+                joli.connection = new joli.Connection(database, undefined, password,readonly);
             }
         }
 
